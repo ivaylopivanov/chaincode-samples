@@ -71,6 +71,14 @@ func TestSetPublicKey(t *testing.T) {
 	assert.Empty(t, res.Payload)
 }
 
+func TestPing(t *testing.T) {
+	stub := shim.NewMockStub("mockStub", new(Storage))
+
+	res := ping(stub, nil)
+	assert.Equal(t, statusOK, res.Status)
+	assert.Equal(t, "pong", string(res.Payload))
+}
+
 func TestGetPublicKey(t *testing.T) {
 	stub := shim.NewMockStub("mockStub", new(Storage))
 
