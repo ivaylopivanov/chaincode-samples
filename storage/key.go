@@ -3,10 +3,10 @@ package main
 import (
 	"errors"
 
-	signatures "github.com/chaingov/api/lib/signatures"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/ivaylopivanov/chaincode-samples/storage/codes"
+	"github.com/ivaylopivanov/chaincode-samples/storage/signatures"
 )
 
 var publicKeyNamespace = "key"
