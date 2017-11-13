@@ -18,6 +18,8 @@ func (s *Storage) Init(stub shim.ChaincodeStubInterface) pb.Response {
 func (s *Storage) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	fn, args := stub.GetFunctionAndParameters()
 	switch fn {
+	case "ping":
+		return ping(stub, args)
 	case "get":
 		return get(stub, args)
 	case "setPublicKey":
