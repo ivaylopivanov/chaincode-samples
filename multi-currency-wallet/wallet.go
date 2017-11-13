@@ -23,10 +23,14 @@ func (w *wallet) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return withdrawal(stub, args)
 	case "transfer":
 		return transfer(stub, args)
+	case "getTransferAttempts":
+		return getTransferAttempts(stub, args)
 	case "get":
 		return get(stub, args)
 	case "getAllKeys":
 		return getAllKeys(stub, args)
+	case "setPublicKey":
+		return setPublicKey(stub, args)
 	case "history":
 		return history(stub, args)
 	default:

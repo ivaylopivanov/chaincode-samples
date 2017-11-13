@@ -6,16 +6,19 @@ import (
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/ivaylopivanov/chaincode-samples/multi-currency-wallet/numbers"
+	"github.com/ivaylopivanov/chaincode-samples/multi-currency-wallet/transactions"
 )
 
 func update(fn string, stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) < 3 {
+	if len(args) < 4 {
 		return shim.Error("Not enough arguments")
 	}
 
-	user := args[0]
-	currency := args[1]
-	value := args[2]
+	method := args[0]
+	user := args[1]
+	currency := args[2]
+	value := args[3]
 
 	current, err := stub.GetState(user)
 	if err != nil {
@@ -43,11 +46,17 @@ func update(fn string, stub shim.ChaincodeStubInterface, args []string) pb.Respo
 		return shim.Error(fmt.Sprintf("Save balance error: %s", err))
 	}
 
-	return shim.Success(nil)
+	t, err := transactions.Save(stub, method, user, currency, value)
+
+	if err != nil {
+		return shim.Error(fmt.Sprintf("Save transaction error: %s", err))
+	}
+
+	return shim.Success(t)
 }
 
 func calculateNewBalance(fn string, change string, current float64) (float64, error) {
-	value, err := stringToFloat64(change)
+	value, err := numbers.StringToFloat64(change)
 	if err != nil {
 		return 0, err
 	}

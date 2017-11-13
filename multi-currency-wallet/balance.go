@@ -7,7 +7,7 @@ import (
 type currencies map[string]float64
 
 type state struct {
-	Currencies currencies
+	Currencies currencies `json:"currencies" msgpack:"currencies"`
 }
 
 func newState(current []byte) (*state, error) {
