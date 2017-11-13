@@ -2,7 +2,7 @@ package codes
 
 const (
 	// UnsupportedOperation error code
-	UnsupportedOperation = "0"
+	UnsupportedOperation = "-1"
 	// NotEnoughArguments error code
 	NotEnoughArguments = "0"
 	// BadRequest error code
