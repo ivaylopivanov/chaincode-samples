@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/ivaylopivanov/chaincode-samples/storage/codes"
 )
 
 // Storage object
@@ -29,6 +30,6 @@ func (s *Storage) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	case "set":
 		return set(stub, args)
 	default:
-		return shim.Error("Unsupported operation")
+		return shim.Error(codes.UnsupportedOperation)
 	}
 }
