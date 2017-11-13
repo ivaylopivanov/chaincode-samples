@@ -6,5 +6,5 @@ import (
 )
 
 func ping(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	return shim.Success([]byte("pong"))
+	return shim.Success([]byte(`{"response": "pong"}`))
 }
