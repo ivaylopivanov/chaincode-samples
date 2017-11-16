@@ -6,6 +6,7 @@ import (
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
+	"github.com/ivaylopivanov/chaincode-samples/storage/codes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -87,6 +88,20 @@ func TestGetPublicKey(t *testing.T) {
 
 	assert.Equal(t, statusOK, res.Status)
 	assert.Equal(t, string(res.Payload), publicKey)
+}
+
+func TestCreate(t *testing.T) {
+	stub := shim.NewMockStub("mockStub", new(Storage))
+
+	fn := func() pb.Response {
+		return stub.MockInvoke(getID(), [][]byte{[]byte("create"), []byte(alias), []byte(publicKey)})
+	}
+
+	res := fn()
+	assert.Equal(t, statusOK, res.Status)
+
+	res = fn()
+	assert.Equal(t, codes.AlreadyExists, res.Message)
 }
 
 func TestSetAndGet(t *testing.T) {

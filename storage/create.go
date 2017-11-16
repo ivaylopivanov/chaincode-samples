@@ -7,28 +7,24 @@ import (
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
-const statusOK = int32(200)
-
-func set(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) < 4 {
+func create(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) < 2 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
-	key := args[1]
-	value := args[2]
-	signature := args[3]
+	key := args[0]
+	value := args[1]
 
 	if key == publicKeyNamespace {
 		return shim.Error(codes.BadRequest)
 	}
 
-	err := verify(stub, alias, key, signature)
-	if err != nil {
-		return shim.Error(codes.Unauthorized)
+	v, err := stub.GetState(key)
+	if err != nil || len(v) > 0 {
+		return shim.Error(codes.AlreadyExists)
 	}
 
-	err = stub.PutState(formatNamespace(alias, key), []byte(value))
+	err = stub.PutState(key, []byte(value))
 	if err != nil {
 		return shim.Error(codes.PutState)
 	}

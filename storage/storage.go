@@ -23,12 +23,14 @@ func (s *Storage) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return ping(stub, args)
 	case "get":
 		return get(stub, args)
+	case "set":
+		return set(stub, args)
+	case "create":
+		return create(stub, args)
 	case "setPublicKey":
 		return setPublicKey(stub, args)
 	case "getPublicKey":
 		return getPublicKey(stub, args)
-	case "set":
-		return set(stub, args)
 	default:
 		return shim.Error(codes.UnsupportedOperation)
 	}
