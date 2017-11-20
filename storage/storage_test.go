@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"strconv"
 	"testing"
 
@@ -64,14 +65,6 @@ func TestNewChaincode(t *testing.T) {
 	}
 }
 
-func TestSetPublicKey(t *testing.T) {
-	stub := shim.NewMockStub("mockStub", new(Storage))
-
-	res := setKey(stub)
-	assert.Equal(t, statusOK, res.Status)
-	assert.Empty(t, res.Payload)
-}
-
 func TestPing(t *testing.T) {
 	stub := shim.NewMockStub("mockStub", new(Storage))
 
@@ -80,34 +73,34 @@ func TestPing(t *testing.T) {
 	assert.Equal(t, "pong", string(res.Payload))
 }
 
-func TestGetPublicKey(t *testing.T) {
-	stub := shim.NewMockStub("mockStub", new(Storage))
-
-	setKey(stub)
-	res := getKey(stub)
-
-	assert.Equal(t, statusOK, res.Status)
-	assert.Equal(t, string(res.Payload), publicKey)
-}
-
 func TestCreate(t *testing.T) {
 	stub := shim.NewMockStub("mockStub", new(Storage))
 
-	fn := func() pb.Response {
-		return stub.MockInvoke(getID(), [][]byte{[]byte("create"), []byte(alias), []byte(publicKey)})
-	}
-
-	res := fn()
+	res := mockCreate(stub)
 	assert.Equal(t, statusOK, res.Status)
 
-	res = fn()
+	res = mockCreate(stub)
 	assert.Equal(t, codes.AlreadyExists, res.Message)
+}
+
+func TestGetKeys(t *testing.T) {
+	stub := shim.NewMockStub("mockStub", new(Storage))
+
+	mockCreate(stub)
+	res := getMockKeys(stub)
+
+	k := &keys{}
+	json.Unmarshal(res.Payload, k)
+
+	assert.Equal(t, statusOK, res.Status)
+	assert.Equal(t, publicKey, k.Public)
+	assert.Equal(t, privateKey, k.Private)
 }
 
 func TestSetAndGet(t *testing.T) {
 	stub := shim.NewMockStub("mockStub", new(Storage))
 
-	setKey(stub)
+	mockCreate(stub)
 	value := "Some wonderful place"
 
 	res := stub.MockInvoke(getID(), [][]byte{[]byte("set"), []byte(alias), key, []byte(value), []byte(signature)})
@@ -124,10 +117,10 @@ func getID() string {
 	return "TXID" + strconv.Itoa(transactionID)
 }
 
-func setKey(stub *shim.MockStub) pb.Response {
-	return stub.MockInvoke(getID(), [][]byte{[]byte("setPublicKey"), []byte(alias), []byte(publicKey)})
+func mockCreate(stub *shim.MockStub) pb.Response {
+	return stub.MockInvoke(getID(), [][]byte{[]byte("create"), []byte(alias), []byte(publicKey), []byte(privateKey)})
 }
 
-func getKey(stub *shim.MockStub) pb.Response {
-	return stub.MockInvoke(getID(), [][]byte{[]byte("getPublicKey"), []byte(alias)})
+func getMockKeys(stub *shim.MockStub) pb.Response {
+	return stub.MockInvoke(getID(), [][]byte{[]byte("getKeys"), []byte(alias)})
 }

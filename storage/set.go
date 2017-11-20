@@ -19,10 +19,6 @@ func set(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	value := args[2]
 	signature := args[3]
 
-	if key == publicKeyNamespace {
-		return shim.Error(codes.BadRequest)
-	}
-
 	err := verify(stub, alias, key, signature)
 	if err != nil {
 		return shim.Error(codes.Unauthorized)

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+
 	"github.com/ivaylopivanov/chaincode-samples/storage/codes"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -8,23 +10,28 @@ import (
 )
 
 func create(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) < 2 {
+	if len(args) < 3 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	key := args[0]
-	value := args[1]
+	alias := args[0]
 
-	if key == publicKeyNamespace {
-		return shim.Error(codes.BadRequest)
-	}
-
-	v, err := stub.GetState(key)
+	v, err := stub.GetState(alias)
 	if err != nil || len(v) > 0 {
 		return shim.Error(codes.AlreadyExists)
 	}
 
-	err = stub.PutState(key, []byte(value))
+	k := keys{
+		Public:  args[1],
+		Private: args[2],
+	}
+
+	b, err := json.Marshal(k)
+	if err != nil {
+		return shim.Error(codes.BadRequest)
+	}
+
+	err = stub.PutState(alias, b)
 	if err != nil {
 		return shim.Error(codes.PutState)
 	}
