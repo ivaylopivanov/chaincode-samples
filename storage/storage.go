@@ -23,6 +23,8 @@ func (s *Storage) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return ping(stub, args)
 	case "get":
 		return get(stub, args)
+	case "multipleGet":
+		return multipleGet(stub, args)
 	case "set":
 		return set(stub, args)
 	case "create":

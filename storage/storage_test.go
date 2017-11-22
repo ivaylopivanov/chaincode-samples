@@ -103,13 +103,30 @@ func TestSetAndGet(t *testing.T) {
 	mockCreate(stub)
 	value := "Some wonderful place"
 
-	res := stub.MockInvoke(getID(), [][]byte{[]byte("set"), []byte(alias), key, []byte(value), []byte(signature)})
+	res := mockSet(stub, key, []byte(value))
 	assert.Equal(t, statusOK, res.Status)
 
 	res = stub.MockInvoke(getID(), [][]byte{[]byte("get"), []byte(alias), key})
 
 	assert.Equal(t, statusOK, res.Status)
 	assert.Equal(t, string(res.Payload), value)
+}
+
+func TestMultipleGetWithSingleKey(t *testing.T) {
+	stub := shim.NewMockStub("mockStub", new(Storage))
+
+	mockCreate(stub)
+	value := "Some wonderful place"
+
+	expected := `{"/profile/get":"Some wonderful place"}`
+
+	res := mockSet(stub, key, []byte(value))
+	assert.Equal(t, statusOK, res.Status)
+
+	res = stub.MockInvoke(getID(), [][]byte{[]byte("multipleGet"), []byte(alias), key})
+
+	assert.Equal(t, statusOK, res.Status)
+	assert.Equal(t, expected, string(res.Payload))
 }
 
 func getID() string {
@@ -119,6 +136,10 @@ func getID() string {
 
 func mockCreate(stub *shim.MockStub) pb.Response {
 	return stub.MockInvoke(getID(), [][]byte{[]byte("create"), []byte(alias), []byte(publicKey), []byte(privateKey)})
+}
+
+func mockSet(stub *shim.MockStub, k, v []byte) pb.Response {
+	return stub.MockInvoke(getID(), [][]byte{[]byte("set"), []byte(alias), k, v, []byte(signature)})
 }
 
 func getMockKeys(stub *shim.MockStub) pb.Response {
