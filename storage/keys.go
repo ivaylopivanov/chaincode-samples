@@ -32,17 +32,29 @@ func getKeys(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 }
 
 func verify(stub shim.ChaincodeStubInterface, alias, key, signature string) error {
+	publicKey, err := getPublicKey(stub, alias)
+	if err != nil {
+		return err
+	}
+	return verifySignature(publicKey, []byte(key), signature)
+}
+
+func verifySignature(publicKey, key []byte, signature string) error {
+	return signatures.Verify(publicKey, key, signature)
+}
+
+func getPublicKey(stub shim.ChaincodeStubInterface, alias string) ([]byte, error) {
 	b, err := stub.GetState(alias)
 	if err != nil {
-		return errors.New(codes.GetState)
+		return nil, errors.New(codes.GetState)
 	}
 
 	k := &keys{}
 	json.Unmarshal(b, k)
 
 	if err != nil {
-		return errors.New(codes.NotFound)
+		return nil, errors.New(codes.NotFound)
 	}
 
-	return signatures.Verify([]byte(k.Public), []byte(key), signature)
+	return []byte(k.Public), nil
 }

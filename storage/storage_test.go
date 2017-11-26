@@ -112,7 +112,7 @@ func TestSetAndGet(t *testing.T) {
 	assert.Equal(t, string(res.Payload), value)
 }
 
-func TestMultipleGetWithSingleKey(t *testing.T) {
+func TestBatchGetWithSingleKey(t *testing.T) {
 	stub := shim.NewMockStub("mockStub", new(Storage))
 
 	mockCreate(stub)
@@ -123,7 +123,39 @@ func TestMultipleGetWithSingleKey(t *testing.T) {
 	res := mockSet(stub, key, []byte(value))
 	assert.Equal(t, statusOK, res.Status)
 
-	res = stub.MockInvoke(getID(), [][]byte{[]byte("multipleGet"), []byte(alias), key})
+	res = stub.MockInvoke(getID(), [][]byte{[]byte("batchGet"), []byte(alias), key})
+
+	assert.Equal(t, statusOK, res.Status)
+	assert.Equal(t, expected, string(res.Payload))
+}
+
+func TestBatchSet(t *testing.T) {
+	stub := shim.NewMockStub("mockStub", new(Storage))
+
+	mockCreate(stub)
+	value := "Some wonderful place"
+
+	expected := `{"/profile/get":"Some wonderful place"}`
+
+	f := []field{
+		field{
+			Key:       string(key),
+			Signature: signature,
+			Value:     value,
+		},
+		field{
+			Key:       string(key),
+			Signature: signature,
+			Value:     value,
+		},
+	}
+
+	b, _ := json.Marshal(f)
+
+	res := stub.MockInvoke(getID(), [][]byte{[]byte("batchSet"), []byte(alias), b})
+	assert.Equal(t, statusOK, res.Status)
+
+	res = stub.MockInvoke(getID(), [][]byte{[]byte("batchGet"), []byte(alias), key})
 
 	assert.Equal(t, statusOK, res.Status)
 	assert.Equal(t, expected, string(res.Payload))
