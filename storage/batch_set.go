@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/ivaylopivanov/chaincode-samples/storage/codes"
+	"github.com/ivaylopivanov/chaincode-samples/storage/keys"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -29,7 +30,7 @@ func batchSet(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.BadRequest)
 	}
 
-	publicKey, err := getPublicKey(stub, alias)
+	publicKey, err := keys.PublicKey(stub, alias)
 	if err != nil {
 		return shim.Error(err.Error())
 	}

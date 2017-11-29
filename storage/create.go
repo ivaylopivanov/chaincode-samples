@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/ivaylopivanov/chaincode-samples/storage/codes"
+	"github.com/ivaylopivanov/chaincode-samples/storage/keys"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -21,7 +22,7 @@ func create(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.AlreadyExists)
 	}
 
-	k := keys{
+	k := keys.Keys{
 		Public:  args[1],
 		Private: args[2],
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/ivaylopivanov/chaincode-samples/storage/codes"
+	"github.com/ivaylopivanov/chaincode-samples/storage/keys"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -89,7 +90,7 @@ func TestGetKeys(t *testing.T) {
 	mockCreate(stub)
 	res := getMockKeys(stub)
 
-	k := &keys{}
+	k := &keys.Keys{}
 	json.Unmarshal(res.Payload, k)
 
 	assert.Equal(t, statusOK, res.Status)
