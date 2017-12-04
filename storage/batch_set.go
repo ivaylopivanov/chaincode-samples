@@ -12,7 +12,7 @@ import (
 
 type field struct {
 	Key       string
-	Value     string
+	Value     []byte
 	Signature string
 }
 
@@ -40,7 +40,7 @@ func batchSet(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		if err != nil {
 			return shim.Error(codes.Unauthorized)
 		}
-		err = stub.PutState(formatNamespace(alias, f.Key), []byte(f.Value))
+		err = stub.PutState(formatNamespace(alias, f.Key), f.Value)
 		if err != nil {
 			return shim.Error(codes.PutState)
 		}
