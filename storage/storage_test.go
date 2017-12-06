@@ -142,12 +142,12 @@ func TestBatchSet(t *testing.T) {
 		field{
 			Key:       string(key),
 			Signature: signature,
-			Value:     []byte(value),
+			Value:     value,
 		},
 		field{
 			Key:       string(key),
 			Signature: signature,
-			Value:     []byte(value),
+			Value:     value,
 		},
 	}
 
