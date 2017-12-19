@@ -17,4 +17,8 @@ const (
 	GetState = "5"
 	// AlreadyExists error code
 	AlreadyExists = "6"
+	// GetHistory error code
+	GetHistory = "7"
+	// Unknown error code
+	Unknown = "8"
 )

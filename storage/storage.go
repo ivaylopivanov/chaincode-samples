@@ -49,6 +49,12 @@ func (s *Storage) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return getPublicKey(stub, args)
 	case "getPrivateKey":
 		return getPrivateKey(stub, args)
+	case "history":
+		return history(stub, args)
+	case "timeOfLastUpdate":
+		return timeOfLastUpdate(stub, args)
+	case "getDetailsForKey":
+		return getDetailsForKey(stub, args)
 	default:
 		return shim.Error(codes.UnsupportedOperation)
 	}
