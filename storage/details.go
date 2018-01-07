@@ -10,7 +10,7 @@ import (
 
 type details struct {
 	Time  int64
-	Value []byte
+	Value string
 }
 
 func getDetailsForKey(stub shim.ChaincodeStubInterface, args []string) pb.Response {
@@ -32,7 +32,7 @@ func getDetailsForKey(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 	}
 
 	d := details{}
-	d.Value = value
+	d.Value = string(value)
 
 	iter, err := stub.GetHistoryForKey(formatNamespace(alias, mainKey))
 	if err != nil {

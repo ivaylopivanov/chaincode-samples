@@ -41,6 +41,8 @@ func (s *Storage) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return set(stub, args)
 	case "batchSet":
 		return batchSet(stub, args)
+	case "batchExchange":
+		return batchExchange(stub, args)
 	case "create":
 		return create(stub, args)
 	case "getKeys":
