@@ -31,7 +31,7 @@ func batchExchange(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	}
 
 	for _, f := range fields {
-		err = verifySignature(publicKey, []byte(formatNamespace(to, f.Key)), f.Signature)
+		err = checkSignature(publicKey, []byte(formatNamespace(to, f.Key)), f.Signature)
 		if err != nil {
 			return shim.Error(codes.Unauthorized)
 		}

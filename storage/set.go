@@ -19,7 +19,7 @@ func set(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	value := args[2]
 	signature := args[3]
 
-	err := verify(stub, alias, key, signature)
+	err := checkIdentity(stub, alias, key, signature)
 	if err != nil {
 		return shim.Error(codes.Unauthorized)
 	}

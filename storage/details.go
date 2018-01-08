@@ -9,8 +9,9 @@ import (
 )
 
 type details struct {
-	Time  int64
-	Value string
+	Time          int64
+	Value         string
+	Verifications []verification
 }
 
 func getDetailsForKey(stub shim.ChaincodeStubInterface, args []string) pb.Response {
@@ -18,11 +19,11 @@ func getDetailsForKey(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
-	mainKey := args[1]
-	composedKey := args[2]
+	from := args[0]
+	to := args[1]
+	key := args[2]
 
-	value, err := stub.GetState(formatNamespace(alias, composedKey))
+	value, err := stub.GetState(formatNamespace(from, formatNamespace(to, key)))
 	if err != nil {
 		return shim.Error(codes.GetState)
 	}
@@ -34,7 +35,7 @@ func getDetailsForKey(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 	d := details{}
 	d.Value = string(value)
 
-	iter, err := stub.GetHistoryForKey(formatNamespace(alias, mainKey))
+	iter, err := stub.GetHistoryForKey(formatNamespace(from, key))
 	if err != nil {
 		return shim.Error(codes.GetState)
 	}
@@ -48,6 +49,13 @@ func getDetailsForKey(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 
 		d.Time = res.Timestamp.Seconds
 	}
+
+	v, err := fetchVerifications(stub, from, key)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	d.Verifications = v
 
 	b, err := json.Marshal(d)
 	if err != nil {

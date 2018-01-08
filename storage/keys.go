@@ -61,14 +61,14 @@ func getPrivateKey(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	return shim.Success(b)
 }
 
-func verify(stub shim.ChaincodeStubInterface, alias, key, signature string) error {
+func checkIdentity(stub shim.ChaincodeStubInterface, alias, key, signature string) error {
 	publicKey, err := keys.PublicKey(stub, alias)
 	if err != nil {
 		return err
 	}
-	return verifySignature(publicKey, []byte(key), signature)
+	return checkSignature(publicKey, []byte(key), signature)
 }
 
-func verifySignature(publicKey, key []byte, signature string) error {
+func checkSignature(publicKey, key []byte, signature string) error {
 	return signatures.Verify(publicKey, key, signature)
 }
