@@ -145,7 +145,9 @@ func fetchVerifications(stub shim.ChaincodeStubInterface, alias, key string) ([]
 	}
 
 	v := []verification{}
-	err = json.Unmarshal(b, &v)
+	if len(b) > 0 {
+		err = json.Unmarshal(b, &v)
+	}
 
 	return v, err
 }
