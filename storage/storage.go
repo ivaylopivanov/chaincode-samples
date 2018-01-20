@@ -57,6 +57,14 @@ func (s *Storage) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return timeOfLastUpdate(stub, args)
 	case "getDetailsForKey":
 		return getDetailsForKey(stub, args)
+	case "isVerified":
+		return isVerified(stub, args)
+	case "verify":
+		return verify(stub, args)
+	case "getVerifications":
+		return getVerifications(stub, args)
+	case "getVerificationFor":
+		return getVerificationFor(stub, args)
 	default:
 		return shim.Error(codes.UnsupportedOperation)
 	}

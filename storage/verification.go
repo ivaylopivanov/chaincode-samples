@@ -13,6 +13,7 @@ import (
 type verification struct {
 	Alias     string
 	Signature string
+	Status    string
 	Timestamp string
 }
 
@@ -34,7 +35,7 @@ func getVerifications(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 	return shim.Success(b)
 }
 
-func getVerification(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func getVerificationFor(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 3 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
@@ -69,8 +70,40 @@ func getVerification(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	return shim.Error(codes.NotFound)
 }
 
+func isVerified(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) < 2 {
+		return shim.Error(codes.NotEnoughArguments)
+	}
+
+	alias := args[0]
+	key := args[1]
+
+	verificationKey := formatVerificationNamespace(alias, key)
+
+	b, err := stub.GetState(verificationKey)
+	if err != nil {
+		return shim.Error(codes.GetState)
+	}
+
+	if b == nil {
+		return shim.Error(codes.NotFound)
+	}
+
+	verifications := []verification{}
+	err = json.Unmarshal(b, &verifications)
+	if err != nil {
+		return shim.Error(codes.Unknown)
+	}
+
+	if len(verifications) == 0 {
+		return shim.Error(codes.NotFound)
+	}
+
+	return shim.Success(nil)
+}
+
 func verify(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) < 5 {
+	if len(args) < 6 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
@@ -78,11 +111,12 @@ func verify(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	to := args[1]
 	key := args[2]
 	signature := args[3]
-	timestamp := args[4]
+	status := args[4]
+	timestamp := args[5]
 
 	publicKey, err := keys.PublicKey(stub, from)
 	if err != nil {
-		return shim.Error(err.Error())
+		return shim.Error(codes.GetState)
 	}
 
 	verificationKey := formatVerificationNamespace(to, key)
@@ -98,20 +132,25 @@ func verify(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 
 	verifications := []verification{}
-	err = json.Unmarshal([]byte(b), &verifications)
-	if err != nil {
-		return shim.Error(codes.Unknown)
+
+	if len(b) > 0 {
+		err = json.Unmarshal([]byte(b), &verifications)
+		if err != nil {
+			return shim.Error(codes.Unknown)
+		}
 	}
 
-	for _, v := range verifications {
+	for k, v := range verifications {
 		if v.Alias == from {
-			return shim.Error(codes.AlreadyExists)
+			verifications = append(verifications[:k], verifications[k+1:]...)
+			break
 		}
 	}
 
 	verifications = append(verifications, verification{
 		Alias:     from,
 		Signature: signature,
+		Status:    status,
 		Timestamp: timestamp,
 	})
 
