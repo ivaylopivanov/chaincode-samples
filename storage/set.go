@@ -29,5 +29,10 @@ func set(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.PutState)
 	}
 
+	err = resetVerification(stub, alias, key)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
 	return shim.Success(nil)
 }

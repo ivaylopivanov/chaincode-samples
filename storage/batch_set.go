@@ -45,6 +45,11 @@ func batchSet(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 			return shim.Error(codes.PutState)
 		}
 
+		err = resetVerification(stub, alias, f.Key)
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+
 	}
 
 	return shim.Success(nil)

@@ -21,4 +21,6 @@ const (
 	GetHistory = "7"
 	// Unknown error code
 	Unknown = "8"
+	// NotVerified error code
+	NotVerified = "9"
 )
