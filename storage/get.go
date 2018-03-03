@@ -13,8 +13,13 @@ func get(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 	alias := args[0]
 	key := args[1]
+	ns := formatNamespace(alias, key)
 
-	value, err := stub.GetState(formatNamespace(alias, key))
+	if len(args) > 2 && args[2] != "" {
+		ns = formatNamespace(args[2], formatNamespace(alias, key))
+	}
+
+	value, err := stub.GetState(ns)
 	if err != nil {
 		return shim.Error(codes.GetState)
 	}

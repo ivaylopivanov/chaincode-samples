@@ -25,7 +25,13 @@ func batchGet(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	for _, k := range keys {
 		wg.Add(1)
 
-		value, err := stub.GetState(formatNamespace(alias, k))
+		ns := formatNamespace(alias, k)
+
+		if len(args) > 2 && args[2] != "" {
+			ns = formatNamespace(args[2], formatNamespace(alias, k))
+		}
+
+		value, err := stub.GetState(ns)
 		if err == nil && len(value) > 0 {
 			results[k] = string(value)
 		}
