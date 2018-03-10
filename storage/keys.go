@@ -18,9 +18,9 @@ func getKeys(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
+	id := args[0]
 
-	b, err := keys.Get(stub, alias)
+	b, err := keys.Get(stub, id)
 
 	if err != nil {
 		return shim.Error(err.Error())
@@ -34,9 +34,9 @@ func getPublicKey(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
+	id := args[0]
 
-	b, err := keys.PublicKey(stub, alias)
+	b, err := keys.PublicKey(stub, id)
 
 	if err != nil {
 		return shim.Error(err.Error())
@@ -50,9 +50,9 @@ func getPrivateKey(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
+	id := args[0]
 
-	b, err := keys.PrivateKey(stub, alias)
+	b, err := keys.PrivateKey(stub, id)
 
 	if err != nil {
 		return shim.Error(err.Error())
@@ -61,14 +61,14 @@ func getPrivateKey(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	return shim.Success(b)
 }
 
-func checkIdentity(stub shim.ChaincodeStubInterface, alias, key, signature string) error {
-	publicKey, err := keys.PublicKey(stub, alias)
+func checkIdentity(stub shim.ChaincodeStubInterface, id, signed, signature string) error {
+	publicKey, err := keys.PublicKey(stub, id)
 	if err != nil {
 		return err
 	}
-	return checkSignature(publicKey, []byte(key), signature)
+	return checkSignature(publicKey, []byte(signed), signature)
 }
 
-func checkSignature(publicKey, key []byte, signature string) error {
-	return signatures.Verify(publicKey, key, signature)
+func checkSignature(publicKey, signed []byte, signature string) error {
+	return signatures.Verify(publicKey, signed, signature)
 }

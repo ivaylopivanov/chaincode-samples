@@ -11,7 +11,7 @@ import (
 )
 
 type field struct {
-	Key       string
+	Property  string
 	Value     string
 	Signature string
 }
@@ -21,7 +21,7 @@ func batchSet(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
+	id := args[0]
 	s := args[1]
 	fields := []field{}
 
@@ -30,22 +30,22 @@ func batchSet(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.BadRequest)
 	}
 
-	publicKey, err := keys.PublicKey(stub, alias)
+	publicKey, err := keys.PublicKey(stub, id)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
 	for _, f := range fields {
-		err = checkSignature(publicKey, []byte(f.Key), f.Signature)
+		err = checkSignature(publicKey, []byte(f.Property), f.Signature)
 		if err != nil {
 			return shim.Error(codes.Unauthorized)
 		}
-		err = stub.PutState(formatNamespace(alias, f.Key), []byte(f.Value))
+		err = stub.PutState(formatNamespace(id, f.Property), []byte(f.Value))
 		if err != nil {
 			return shim.Error(codes.PutState)
 		}
 
-		err = resetVerification(stub, alias, f.Key)
+		err = resetVerification(stub, id, f.Property)
 		if err != nil {
 			return shim.Error(err.Error())
 		}

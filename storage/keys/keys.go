@@ -15,8 +15,8 @@ type Keys struct {
 }
 
 // Get keys
-func Get(stub shim.ChaincodeStubInterface, alias string) ([]byte, error) {
-	b, err := stub.GetState(alias)
+func Get(stub shim.ChaincodeStubInterface, id string) ([]byte, error) {
+	b, err := stub.GetState(id)
 
 	if err != nil {
 		return nil, errors.New(codes.GetState)
@@ -25,9 +25,9 @@ func Get(stub shim.ChaincodeStubInterface, alias string) ([]byte, error) {
 	return b, nil
 }
 
-// PublicKey for alias
-func PublicKey(stub shim.ChaincodeStubInterface, alias string) ([]byte, error) {
-	b, err := stub.GetState(alias)
+// PublicKey for id
+func PublicKey(stub shim.ChaincodeStubInterface, id string) ([]byte, error) {
+	b, err := stub.GetState(id)
 	if err != nil {
 		return nil, errors.New(codes.GetState)
 	}
@@ -42,9 +42,9 @@ func PublicKey(stub shim.ChaincodeStubInterface, alias string) ([]byte, error) {
 	return []byte(k.Public), nil
 }
 
-// PrivateKey for alias
-func PrivateKey(stub shim.ChaincodeStubInterface, alias string) ([]byte, error) {
-	b, err := stub.GetState(alias)
+// PrivateKey for id
+func PrivateKey(stub shim.ChaincodeStubInterface, id string) ([]byte, error) {
+	b, err := stub.GetState(id)
 	if err != nil {
 		return nil, errors.New(codes.GetState)
 	}

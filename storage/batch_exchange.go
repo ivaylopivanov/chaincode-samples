@@ -31,15 +31,15 @@ func batchExchange(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	}
 
 	for _, f := range fields {
-		err = checkSignature(publicKey, []byte(formatNamespace(to, f.Key)), f.Signature)
-		err = resetVerificationFor(stub, from, to, f.Key)
+		err = checkSignature(publicKey, []byte(formatNamespace(to, f.Property)), f.Signature)
+		err = resetVerificationFor(stub, from, to, f.Property)
 		if err != nil {
 			return shim.Error(err.Error())
 		}
 		if err != nil {
 			return shim.Error(codes.Unauthorized)
 		}
-		err = stub.PutState(formatNamespace(from, formatNamespace(to, f.Key)), []byte(f.Value))
+		err = stub.PutState(formatNamespace(from, formatNamespace(to, f.Property)), []byte(f.Value))
 		if err != nil {
 			return shim.Error(codes.PutState)
 		}

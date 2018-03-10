@@ -15,9 +15,9 @@ func create(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
+	id := args[0]
 
-	v, err := stub.GetState(alias)
+	v, err := stub.GetState(id)
 	if err != nil || len(v) > 0 {
 		return shim.Error(codes.AlreadyExists)
 	}
@@ -32,7 +32,7 @@ func create(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.BadRequest)
 	}
 
-	err = stub.PutState(alias, b)
+	err = stub.PutState(id, b)
 	if err != nil {
 		return shim.Error(codes.PutState)
 	}

@@ -20,10 +20,10 @@ func history(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
+	id := args[0]
 	key := args[1]
 
-	iter, err := stub.GetHistoryForKey(formatNamespace(alias, key))
+	iter, err := stub.GetHistoryForKey(formatNamespace(id, key))
 	if err != nil {
 		return shim.Error(codes.GetState)
 	}

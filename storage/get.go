@@ -11,12 +11,12 @@ func get(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
-	key := args[1]
-	ns := formatNamespace(alias, key)
+	id := args[0]
+	property := args[1]
+	ns := formatNamespace(id, property)
 
 	if len(args) > 2 && args[2] != "" {
-		ns = formatNamespace(args[2], formatNamespace(alias, key))
+		ns = formatNamespace(args[2], formatNamespace(id, property))
 	}
 
 	value, err := stub.GetState(ns)

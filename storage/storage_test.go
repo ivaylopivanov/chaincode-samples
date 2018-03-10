@@ -52,10 +52,10 @@ nXbrJYAG5mOjW//wwfRz3hMlnzKDIvZ946dHIPsguF2qRYjmNndQmAoShohnWlrT
 -----END RSA PRIVATE KEY-----`
 
 const signature = "FAGwbzC323MKl8HUz+NgbOxW2NRMh7Qm+lsq5LHZt9uTYgl6sGwmO1WMD6Zh3Bu0mApwtiksncis1V5d/aJg634wZUCs4dWVj53YI1//9tRvzF/q+T3LV4DcQOFLHr9dygNUMTin/ZYqRihS6mVaF/Wg6fKNkJmom7QNA05ZxqlyjzlHNXiKQ0V6MA3XY/+PwvbGu0cveK+pBg/hHl/Rm+y3gCTT9r5VwVWoSQC88eWba2LhNPo7UR/Glr4DA/INethiS16s2KWf6gmwgvi9S/V3uH93iHQty7rVXHIfZxY6BsU+dIUcM6upGN5pQTaWbqYBKeM9WZ7DF0bBOAbVhg=="
-const alias = "0ff9092fcd5908014591db39950581d8f3a28144ef7a78295e6b549e734e5ee93fb8d586c8e5969806cddbfa61ed8cf9588289dd2ef5e58cd339c0969a6d01f7"
+const id = "1234567"
 
 var (
-	key           = []byte("/profile/get")
+	property      = []byte("/profile/get")
 	transactionID = 0
 )
 
@@ -104,10 +104,10 @@ func TestSetAndGet(t *testing.T) {
 	mockCreate(stub)
 	value := "Some wonderful place"
 
-	res := mockSet(stub, key, []byte(value))
+	res := mockSet(stub, property, []byte(value))
 	assert.Equal(t, statusOK, res.Status)
 
-	res = stub.MockInvoke(getID(), [][]byte{[]byte("get"), []byte(alias), key})
+	res = stub.MockInvoke(getID(), [][]byte{[]byte("get"), []byte(id), property})
 
 	assert.Equal(t, statusOK, res.Status)
 	assert.Equal(t, string(res.Payload), value)
@@ -121,10 +121,10 @@ func TestBatchGetWithSingleKey(t *testing.T) {
 
 	expected := `{"/profile/get":"Some wonderful place"}`
 
-	res := mockSet(stub, key, []byte(value))
+	res := mockSet(stub, property, []byte(value))
 	assert.Equal(t, statusOK, res.Status)
 
-	res = stub.MockInvoke(getID(), [][]byte{[]byte("batchGet"), []byte(alias), key})
+	res = stub.MockInvoke(getID(), [][]byte{[]byte("batchGet"), []byte(id), property})
 
 	assert.Equal(t, statusOK, res.Status)
 	assert.Equal(t, expected, string(res.Payload))
@@ -140,12 +140,12 @@ func TestBatchSet(t *testing.T) {
 
 	f := []field{
 		field{
-			Key:       string(key),
+			Property:  string(property),
 			Signature: signature,
 			Value:     value,
 		},
 		field{
-			Key:       string(key),
+			Property:  string(property),
 			Signature: signature,
 			Value:     value,
 		},
@@ -153,10 +153,10 @@ func TestBatchSet(t *testing.T) {
 
 	b, _ := json.Marshal(f)
 
-	res := stub.MockInvoke(getID(), [][]byte{[]byte("batchSet"), []byte(alias), b})
+	res := stub.MockInvoke(getID(), [][]byte{[]byte("batchSet"), []byte(id), b})
 	assert.Equal(t, statusOK, res.Status)
 
-	res = stub.MockInvoke(getID(), [][]byte{[]byte("batchGet"), []byte(alias), key})
+	res = stub.MockInvoke(getID(), [][]byte{[]byte("batchGet"), []byte(id), property})
 
 	assert.Equal(t, statusOK, res.Status)
 	assert.Equal(t, expected, string(res.Payload))
@@ -168,13 +168,13 @@ func getID() string {
 }
 
 func mockCreate(stub *shim.MockStub) pb.Response {
-	return stub.MockInvoke(getID(), [][]byte{[]byte("create"), []byte(alias), []byte(publicKey), []byte(privateKey)})
+	return stub.MockInvoke(getID(), [][]byte{[]byte("create"), []byte(id), []byte(publicKey), []byte(privateKey)})
 }
 
 func mockSet(stub *shim.MockStub, k, v []byte) pb.Response {
-	return stub.MockInvoke(getID(), [][]byte{[]byte("set"), []byte(alias), k, v, []byte(signature)})
+	return stub.MockInvoke(getID(), [][]byte{[]byte("set"), []byte(id), k, v, []byte(signature)})
 }
 
 func getMockKeys(stub *shim.MockStub) pb.Response {
-	return stub.MockInvoke(getID(), [][]byte{[]byte("getKeys"), []byte(alias)})
+	return stub.MockInvoke(getID(), [][]byte{[]byte("getKeys"), []byte(id)})
 }

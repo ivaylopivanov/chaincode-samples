@@ -14,22 +14,22 @@ func set(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
-	key := args[1]
+	id := args[0]
+	property := args[1]
 	value := args[2]
 	signature := args[3]
 
-	err := checkIdentity(stub, alias, key, signature)
+	err := checkIdentity(stub, id, property, signature)
 	if err != nil {
 		return shim.Error(codes.Unauthorized)
 	}
 
-	err = stub.PutState(formatNamespace(alias, key), []byte(value))
+	err = stub.PutState(formatNamespace(id, property), []byte(value))
 	if err != nil {
 		return shim.Error(codes.PutState)
 	}
 
-	err = resetVerification(stub, alias, key)
+	err = resetVerification(stub, id, property)
 	if err != nil {
 		return shim.Error(err.Error())
 	}

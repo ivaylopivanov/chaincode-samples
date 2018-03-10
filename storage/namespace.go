@@ -1,5 +1,5 @@
 package main
 
-func formatNamespace(alias, key string) string {
-	return key + "-" + alias
+func formatNamespace(id, property string) string {
+	return property + "-" + id
 }

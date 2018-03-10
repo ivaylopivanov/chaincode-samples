@@ -13,7 +13,7 @@ type Storage struct {
 // Init will do nothing
 func (s *Storage) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	args := []string{
-		"506870bbc1e774ab21e704a5140e062a116c3f52",
+		"1234567",
 		`-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiRH6L4HHc8pF5ujVoNtt
 fx2z9HlC+x5y3d8Tw8bkkxUZh7jn3fXL56hdgv1OAEy0vMAcZmqRs7DzSNOhY69Q
@@ -55,8 +55,8 @@ func (s *Storage) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return history(stub, args)
 	case "timeOfLastUpdate":
 		return timeOfLastUpdate(stub, args)
-	case "getDetailsForKey":
-		return getDetailsForKey(stub, args)
+	case "getDetailsForProperty":
+		return getDetailsForProperty(stub, args)
 	case "isVerified":
 		return isVerified(stub, args)
 	case "verify":

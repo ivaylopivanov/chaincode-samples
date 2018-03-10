@@ -15,25 +15,25 @@ func batchGet(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
-	keys := strings.Split(args[1], ",")
+	id := args[0]
+	properties := strings.Split(args[1], ",")
 
 	var wg sync.WaitGroup
 
 	results := map[string]string{}
 
-	for _, k := range keys {
+	for _, pr := range properties {
 		wg.Add(1)
 
-		ns := formatNamespace(alias, k)
+		ns := formatNamespace(id, pr)
 
 		if len(args) > 2 && args[2] != "" {
-			ns = formatNamespace(args[2], formatNamespace(alias, k))
+			ns = formatNamespace(args[2], formatNamespace(id, pr))
 		}
 
 		value, err := stub.GetState(ns)
 		if err == nil && len(value) > 0 {
-			results[k] = string(value)
+			results[pr] = string(value)
 		}
 
 		wg.Done()

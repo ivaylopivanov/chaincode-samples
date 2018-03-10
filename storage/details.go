@@ -14,16 +14,16 @@ type details struct {
 	Verifications []verification
 }
 
-func getDetailsForKey(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func getDetailsForProperty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 3 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
 	from := args[0]
 	to := args[1]
-	key := args[2]
+	property := args[2]
 
-	value, err := stub.GetState(formatNamespace(from, formatNamespace(to, key)))
+	value, err := stub.GetState(formatNamespace(from, formatNamespace(to, property)))
 	if err != nil {
 		return shim.Error(codes.GetState)
 	}
@@ -35,7 +35,7 @@ func getDetailsForKey(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 	d := details{}
 	d.Value = string(value)
 
-	iter, err := stub.GetHistoryForKey(formatNamespace(from, key))
+	iter, err := stub.GetHistoryForKey(formatNamespace(from, property))
 	if err != nil {
 		return shim.Error(codes.GetState)
 	}
@@ -50,7 +50,7 @@ func getDetailsForKey(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 		d.Time = res.Timestamp.Seconds
 	}
 
-	v, err := fetchVerifications(stub, from, key)
+	v, err := fetchVerifications(stub, from, property)
 	if err != nil {
 		return shim.Error(err.Error())
 	}

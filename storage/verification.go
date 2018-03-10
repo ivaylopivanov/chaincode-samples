@@ -11,7 +11,7 @@ import (
 )
 
 type verification struct {
-	Alias     string
+	ID        string
 	Signature string
 	Status    string
 	Timestamp string
@@ -27,12 +27,12 @@ func getVerifications(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
-	key := args[1]
+	id := args[0]
+	property := args[1]
 
-	verificationKey := formatVerificationNamespace(alias, key)
+	ns := formatVerificationNamespace(id, property)
 
-	b, err := stub.GetState(verificationKey)
+	b, err := stub.GetState(ns)
 	if err != nil {
 		return shim.Error(codes.GetState)
 	}
@@ -45,13 +45,13 @@ func getVerificationFor(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
-	key := args[1]
-	aliasToCheckFor := args[2]
+	id := args[0]
+	property := args[1]
+	idToCheckFor := args[2]
 
-	verificationKey := formatVerificationNamespace(alias, key)
+	ns := formatVerificationNamespace(id, property)
 
-	b, err := stub.GetState(verificationKey)
+	b, err := stub.GetState(ns)
 	if err != nil {
 		return shim.Error(codes.GetState)
 	}
@@ -63,7 +63,7 @@ func getVerificationFor(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 	}
 
 	for _, v := range verifications {
-		if v.Alias == aliasToCheckFor {
+		if v.ID == idToCheckFor {
 			b, err = json.Marshal(&v)
 			if err != nil {
 				return shim.Error(codes.Unknown)
@@ -80,12 +80,12 @@ func isVerified(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
-	alias := args[0]
-	key := args[1]
+	id := args[0]
+	property := args[1]
 
-	verificationKey := formatVerificationNamespace(alias, key)
+	ns := formatVerificationNamespace(id, property)
 
-	b, err := stub.GetState(verificationKey)
+	b, err := stub.GetState(ns)
 	if err != nil {
 		return shim.Error(codes.GetState)
 	}
@@ -120,7 +120,7 @@ func verify(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 	from := args[0]
 	to := args[1]
-	key := args[2]
+	property := args[2]
 	signature := args[3]
 	status := args[4]
 	timestamp := args[5]
@@ -130,14 +130,14 @@ func verify(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.GetState)
 	}
 
-	verificationKey := formatVerificationNamespace(to, key)
+	ns := formatVerificationNamespace(to, property)
 
-	err = checkSignature(publicKey, []byte(verificationKey), signature)
+	err = checkSignature(publicKey, []byte(ns), signature)
 	if err != nil {
 		return shim.Error(codes.Unauthorized)
 	}
 
-	b, err := stub.GetState(verificationKey)
+	b, err := stub.GetState(ns)
 	if err != nil {
 		return shim.Error(codes.GetState)
 	}
@@ -152,14 +152,14 @@ func verify(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 
 	for k, v := range verifications {
-		if v.Alias == from {
+		if v.ID == from {
 			verifications = append(verifications[:k], verifications[k+1:]...)
 			break
 		}
 	}
 
 	verifications = append(verifications, verification{
-		Alias:     from,
+		ID:        from,
 		Signature: signature,
 		Status:    status,
 		Timestamp: timestamp,
@@ -170,7 +170,7 @@ func verify(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.Unknown)
 	}
 
-	err = stub.PutState(verificationKey, b)
+	err = stub.PutState(ns, b)
 	if err != nil {
 		return shim.Error(codes.PutState)
 	}
@@ -178,18 +178,18 @@ func verify(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	return shim.Success(nil)
 }
 
-func resetVerification(stub shim.ChaincodeStubInterface, alias, key string) error {
-	err := stub.PutState(formatVerificationNamespace(alias, key), []byte(nil))
+func resetVerification(stub shim.ChaincodeStubInterface, id, property string) error {
+	err := stub.PutState(formatVerificationNamespace(id, property), []byte(nil))
 	if err != nil {
 		return errors.New(codes.PutState)
 	}
 	return nil
 }
 
-func resetVerificationFor(stub shim.ChaincodeStubInterface, from, to, key string) error {
-	verificationKey := formatVerificationNamespace(from, key)
+func resetVerificationFor(stub shim.ChaincodeStubInterface, from, to, property string) error {
+	ns := formatVerificationNamespace(from, property)
 
-	b, err := stub.GetState(verificationKey)
+	b, err := stub.GetState(ns)
 	if err != nil {
 		return errors.New(codes.GetState)
 	}
@@ -200,7 +200,7 @@ func resetVerificationFor(stub shim.ChaincodeStubInterface, from, to, key string
 	}
 
 	for k, v := range vers {
-		if v.Alias == to {
+		if v.ID == to {
 			vers = append(vers[:k], vers[k+1:]...)
 		}
 	}
@@ -210,7 +210,7 @@ func resetVerificationFor(stub shim.ChaincodeStubInterface, from, to, key string
 		return errors.New(codes.Unknown)
 	}
 
-	err = stub.PutState(verificationKey, b)
+	err = stub.PutState(ns, b)
 	if err != nil {
 		return errors.New(codes.PutState)
 	}
@@ -218,10 +218,10 @@ func resetVerificationFor(stub shim.ChaincodeStubInterface, from, to, key string
 	return err
 }
 
-func fetchVerifications(stub shim.ChaincodeStubInterface, alias, key string) ([]verification, error) {
-	verificationKey := formatVerificationNamespace(alias, key)
+func fetchVerifications(stub shim.ChaincodeStubInterface, id, property string) ([]verification, error) {
+	ns := formatVerificationNamespace(id, property)
 
-	b, err := stub.GetState(verificationKey)
+	b, err := stub.GetState(ns)
 	if err != nil {
 		return nil, errors.New(codes.GetState)
 	}
@@ -234,6 +234,6 @@ func fetchVerifications(stub shim.ChaincodeStubInterface, alias, key string) ([]
 	return v, err
 }
 
-func formatVerificationNamespace(alias, key string) string {
-	return alias + "-verified" + key
+func formatVerificationNamespace(id, property string) string {
+	return id + "-verified" + property
 }
