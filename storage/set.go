@@ -16,7 +16,7 @@ func set(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 	id := args[0]
 	property := args[1]
-	value := args[2]
+	hash := args[2]
 	signature := args[3]
 
 	err := checkIdentity(stub, id, property, signature)
@@ -24,7 +24,7 @@ func set(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		return shim.Error(codes.Unauthorized)
 	}
 
-	err = stub.PutState(formatNamespace(id, property), []byte(value))
+	err = stub.PutState(formatNamespace(id, property), []byte(hash))
 	if err != nil {
 		return shim.Error(codes.PutState)
 	}

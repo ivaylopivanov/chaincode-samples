@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"strconv"
 	"testing"
@@ -135,19 +137,22 @@ func TestBatchSet(t *testing.T) {
 
 	mockCreate(stub)
 	value := "Some wonderful place"
+	h := sha256.New()
+	h.Write([]byte(value))
+	hash := hex.EncodeToString(h.Sum(nil))
 
-	expected := `{"/profile/get":"Some wonderful place"}`
+	expected := `{"/profile/get":"` + hash + `"}`
 
 	f := []field{
 		field{
 			Property:  string(property),
 			Signature: signature,
-			Value:     value,
+			Hash:      hash,
 		},
 		field{
 			Property:  string(property),
 			Signature: signature,
-			Value:     value,
+			Hash:      hash,
 		},
 	}
 

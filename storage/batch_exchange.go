@@ -39,7 +39,7 @@ func batchExchange(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 		if err != nil {
 			return shim.Error(codes.Unauthorized)
 		}
-		err = stub.PutState(formatNamespace(from, formatNamespace(to, f.Property)), []byte(f.Value))
+		err = stub.PutState(formatNamespace(from, formatNamespace(to, f.Property)), []byte(f.Hash))
 		if err != nil {
 			return shim.Error(codes.PutState)
 		}

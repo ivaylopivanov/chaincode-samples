@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"strconv"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -11,7 +12,7 @@ import (
 )
 
 type verification struct {
-	ID        string
+	UserID    int64
 	Signature string
 	Status    string
 	Timestamp string
@@ -47,7 +48,7 @@ func getVerificationFor(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 
 	id := args[0]
 	property := args[1]
-	idToCheckFor := args[2]
+	toCheckFor := args[2]
 
 	ns := formatVerificationNamespace(id, property)
 
@@ -62,8 +63,10 @@ func getVerificationFor(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 		return shim.Error(codes.BadRequest)
 	}
 
+	idToCheckFor, _ := stringToInt64(toCheckFor)
+
 	for _, v := range verifications {
-		if v.ID == idToCheckFor {
+		if v.UserID == idToCheckFor {
 			b, err = json.Marshal(&v)
 			if err != nil {
 				return shim.Error(codes.Unknown)
@@ -151,15 +154,17 @@ func verify(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		}
 	}
 
+	id, _ := stringToInt64(from)
+
 	for k, v := range verifications {
-		if v.ID == from {
+		if v.UserID == id {
 			verifications = append(verifications[:k], verifications[k+1:]...)
 			break
 		}
 	}
 
 	verifications = append(verifications, verification{
-		ID:        from,
+		UserID:    id,
 		Signature: signature,
 		Status:    status,
 		Timestamp: timestamp,
@@ -199,8 +204,10 @@ func resetVerificationFor(stub shim.ChaincodeStubInterface, from, to, property s
 		err = json.Unmarshal(b, &vers)
 	}
 
+	id, _ := stringToInt64(to)
+
 	for k, v := range vers {
-		if v.ID == to {
+		if v.UserID == id {
 			vers = append(vers[:k], vers[k+1:]...)
 		}
 	}
@@ -236,4 +243,12 @@ func fetchVerifications(stub shim.ChaincodeStubInterface, id, property string) (
 
 func formatVerificationNamespace(id, property string) string {
 	return id + "-verified" + property
+}
+
+func stringToInt64(s string) (int64, error) {
+	i, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return i, nil
 }
