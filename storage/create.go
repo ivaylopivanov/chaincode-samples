@@ -10,7 +10,7 @@ import (
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
-func create(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) create(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 3 {
 		return shim.Error(codes.NotEnoughArguments)
 	}

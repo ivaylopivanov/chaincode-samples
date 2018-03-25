@@ -8,7 +8,7 @@ import (
 	"github.com/ivaylopivanov/chaincode-samples/storage/codes"
 )
 
-func timeOfLastUpdate(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) timeOfLastUpdate(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 2 {
 		return shim.Error(codes.NotEnoughArguments)
 	}

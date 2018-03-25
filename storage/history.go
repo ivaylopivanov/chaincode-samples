@@ -15,7 +15,7 @@ type Transaction struct {
 	ID        string
 }
 
-func history(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) history(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 2 {
 		return shim.Error(codes.NotEnoughArguments)
 	}

@@ -8,12 +8,7 @@ import (
 	"github.com/ivaylopivanov/chaincode-samples/storage/signatures"
 )
 
-// type keys struct {
-// 	Public  string
-// 	Private string
-// }
-
-func getKeys(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) getKeys(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 1 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
@@ -29,7 +24,7 @@ func getKeys(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	return shim.Success(b)
 }
 
-func getPublicKey(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) getPublicKey(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 1 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
@@ -45,7 +40,7 @@ func getPublicKey(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	return shim.Success(b)
 }
 
-func getPrivateKey(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) getPrivateKey(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 1 {
 		return shim.Error(codes.NotEnoughArguments)
 	}

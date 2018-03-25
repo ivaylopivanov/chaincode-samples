@@ -23,7 +23,7 @@ var (
 	StatusRejected = "rejected"
 )
 
-func getVerifications(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) getVerifications(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 2 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
@@ -41,7 +41,7 @@ func getVerifications(stub shim.ChaincodeStubInterface, args []string) pb.Respon
 	return shim.Success(b)
 }
 
-func getVerificationFor(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) getVerificationFor(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 3 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
@@ -78,7 +78,7 @@ func getVerificationFor(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 	return shim.Error(codes.NotFound)
 }
 
-func isVerified(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) isVerified(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 2 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
@@ -116,7 +116,7 @@ func isVerified(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	return shim.Success(nil)
 }
 
-func verify(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) verify(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 6 {
 		return shim.Error(codes.NotEnoughArguments)
 	}

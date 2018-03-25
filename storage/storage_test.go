@@ -11,6 +11,7 @@ import (
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/ivaylopivanov/chaincode-samples/storage/codes"
 	"github.com/ivaylopivanov/chaincode-samples/storage/keys"
+	"github.com/ivaylopivanov/chaincode-samples/storage/signatures"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -71,7 +72,7 @@ func TestNewChaincode(t *testing.T) {
 func TestPing(t *testing.T) {
 	stub := shim.NewMockStub("mockStub", new(Storage))
 
-	res := ping(stub, nil)
+	res := stub.MockInvoke(getID(), [][]byte{[]byte("ping")})
 	assert.Equal(t, statusOK, res.Status)
 	assert.Equal(t, "pong", string(res.Payload))
 }
@@ -165,6 +166,37 @@ func TestBatchSet(t *testing.T) {
 
 	assert.Equal(t, statusOK, res.Status)
 	assert.Equal(t, expected, string(res.Payload))
+	stub.MockInvoke(getID(), [][]byte{[]byte("history"), []byte(id), property})
+}
+
+func TestIdentify(t *testing.T) {
+	stub := shim.NewMockStub("mockStub", new(Storage))
+
+	mockCreate(stub)
+
+	testIdentify := func(trx string, expected bool) int64 {
+		b, err := signatures.Sign([]byte(privateKey), []byte(trx))
+		assert.Equal(t, nil, err)
+
+		res := stub.MockInvoke(getID(), [][]byte{[]byte("identify"), []byte(id), b})
+		payload := identifyRes{}
+
+		json.Unmarshal(res.Payload, &payload)
+		assert.Equal(t, expected, payload.Success)
+
+		return payload.Current
+	}
+
+	testIdentify("1", true)
+	testIdentify("2", true)
+	testIdentify("0", false)
+	testIdentify("3", true)
+	testIdentify("4", true)
+	testIdentify("4213213", false)
+	testIdentify("0", false)
+	current := testIdentify("5", true)
+
+	assert.Equal(t, int64(5), current)
 }
 
 func getID() string {

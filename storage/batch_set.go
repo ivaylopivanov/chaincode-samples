@@ -16,16 +16,16 @@ type field struct {
 	Signature string
 }
 
-func batchSet(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) batchSet(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 2 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
 	id := args[0]
-	s := args[1]
+	f := args[1]
 	fields := []field{}
 
-	err := json.Unmarshal([]byte(s), &fields)
+	err := json.Unmarshal([]byte(f), &fields)
 	if err != nil {
 		return shim.Error(codes.BadRequest)
 	}

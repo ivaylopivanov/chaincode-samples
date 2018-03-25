@@ -10,17 +10,17 @@ import (
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
-func batchExchange(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) batchExchange(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 3 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
 
 	from := args[0]
 	to := args[1]
-	s := args[2]
+	f := args[2]
 	fields := []field{}
 
-	err := json.Unmarshal([]byte(s), &fields)
+	err := json.Unmarshal([]byte(f), &fields)
 	if err != nil {
 		return shim.Error(codes.BadRequest)
 	}

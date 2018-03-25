@@ -5,6 +5,6 @@ import (
 	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
-func ping(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) ping(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	return shim.Success([]byte(`pong`))
 }

@@ -2,6 +2,7 @@ package signatures
 
 import (
 	"crypto"
+	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
@@ -26,6 +27,21 @@ func Verify(key, toVerify []byte, signed string) error {
 	return parser.SignVerify(toVerify, decoded)
 }
 
+// Sign message
+func Sign(key, data []byte) ([]byte, error) {
+	parser, err := loadPrivateKey(key)
+	if err != nil {
+		return nil, err
+	}
+
+	s, err := parser.Sign(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return []byte(base64.StdEncoding.EncodeToString(s)), nil
+}
+
 //
 //  All the code under this line was found on the internet
 //
@@ -34,8 +50,8 @@ func loadPublicKey(key []byte) (Verifier, error) {
 	return parsePublicKey(key)
 }
 
-func parsePublicKey(pemBytes []byte) (Verifier, error) {
-	block, _ := pem.Decode(pemBytes)
+func parsePublicKey(b []byte) (Verifier, error) {
+	block, _ := pem.Decode(b)
 	if block == nil {
 		return nil, errors.New("Unable To Decode Public Key")
 	}
@@ -80,4 +96,55 @@ func (r *rsaPublicKey) SignVerify(message []byte, sig []byte) error {
 	h.Write(message)
 	d := h.Sum(nil)
 	return rsa.VerifyPKCS1v15(r.PublicKey, crypto.SHA256, d, sig)
+}
+
+// loadPrivateKey parses a PEM encoded private key.
+func loadPrivateKey(b []byte) (Signer, error) {
+	block, _ := pem.Decode(b)
+	if block == nil {
+		return nil, errors.New("ssh: no key found")
+	}
+
+	var rawkey interface{}
+	switch block.Type {
+	case "RSA PRIVATE KEY":
+		rsa, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		rawkey = rsa
+	default:
+		return nil, fmt.Errorf("ssh: unsupported key type %q", block.Type)
+	}
+	return newSignerFromKey(rawkey)
+}
+
+// A Signer is can create signatures that verify against a public key.
+type Signer interface {
+	// Sign returns raw signature for the given data. This method
+	// will apply the hash specified for the keytype to the data.
+	Sign(data []byte) ([]byte, error)
+}
+
+func newSignerFromKey(k interface{}) (Signer, error) {
+	var sshKey Signer
+	switch t := k.(type) {
+	case *rsa.PrivateKey:
+		sshKey = &rsaPrivateKey{t}
+	default:
+		return nil, fmt.Errorf("ssh: unsupported key type %T", k)
+	}
+	return sshKey, nil
+}
+
+type rsaPrivateKey struct {
+	*rsa.PrivateKey
+}
+
+// Sign signs data with rsa-sha256
+func (r *rsaPrivateKey) Sign(data []byte) ([]byte, error) {
+	h := sha256.New()
+	h.Write(data)
+	d := h.Sum(nil)
+	return rsa.SignPKCS1v15(rand.Reader, r.PrivateKey, crypto.SHA256, d)
 }

@@ -9,7 +9,7 @@ import (
 
 const statusOK = int32(200)
 
-func set(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) set(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 4 {
 		return shim.Error(codes.NotEnoughArguments)
 	}

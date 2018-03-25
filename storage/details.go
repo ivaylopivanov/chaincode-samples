@@ -14,7 +14,7 @@ type details struct {
 	Verifications []verification
 }
 
-func getDetailsForProperty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func (s Storage) getDetailsForProperty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 3 {
 		return shim.Error(codes.NotEnoughArguments)
 	}
