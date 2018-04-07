@@ -10,7 +10,7 @@ import (
 
 func (s Storage) getKeys(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 1 {
-		return shim.Error(codes.NotEnoughArguments)
+		return shim.Error(codes.WrongAmountOfArguments)
 	}
 
 	id := args[0]
@@ -26,7 +26,7 @@ func (s Storage) getKeys(stub shim.ChaincodeStubInterface, args []string) pb.Res
 
 func (s Storage) getPublicKey(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 1 {
-		return shim.Error(codes.NotEnoughArguments)
+		return shim.Error(codes.WrongAmountOfArguments)
 	}
 
 	id := args[0]
@@ -42,7 +42,7 @@ func (s Storage) getPublicKey(stub shim.ChaincodeStubInterface, args []string) p
 
 func (s Storage) getPrivateKey(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 1 {
-		return shim.Error(codes.NotEnoughArguments)
+		return shim.Error(codes.WrongAmountOfArguments)
 	}
 
 	id := args[0]

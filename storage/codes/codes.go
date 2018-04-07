@@ -3,8 +3,8 @@ package codes
 const (
 	// UnsupportedOperation error code
 	UnsupportedOperation = "-1"
-	// NotEnoughArguments error code
-	NotEnoughArguments = "0"
+	// WrongAmountOfArguments error code
+	WrongAmountOfArguments = "0"
 	// BadRequest error code
 	BadRequest = "1"
 	// NotFound error code
@@ -23,4 +23,8 @@ const (
 	Unknown = "8"
 	// NotVerified error code
 	NotVerified = "9"
+	// TimeViolation error code
+	TimeViolation = "10"
+	// KeyViolation error code
+	KeyViolation = "11"
 )

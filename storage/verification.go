@@ -8,7 +8,6 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/ivaylopivanov/chaincode-samples/storage/codes"
-	"github.com/ivaylopivanov/chaincode-samples/storage/keys"
 )
 
 type verification struct {
@@ -25,7 +24,7 @@ var (
 
 func (s Storage) getVerifications(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 2 {
-		return shim.Error(codes.NotEnoughArguments)
+		return shim.Error(codes.WrongAmountOfArguments)
 	}
 
 	id := args[0]
@@ -43,7 +42,7 @@ func (s Storage) getVerifications(stub shim.ChaincodeStubInterface, args []strin
 
 func (s Storage) getVerificationFor(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 3 {
-		return shim.Error(codes.NotEnoughArguments)
+		return shim.Error(codes.WrongAmountOfArguments)
 	}
 
 	id := args[0]
@@ -80,7 +79,7 @@ func (s Storage) getVerificationFor(stub shim.ChaincodeStubInterface, args []str
 
 func (s Storage) isVerified(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 2 {
-		return shim.Error(codes.NotEnoughArguments)
+		return shim.Error(codes.WrongAmountOfArguments)
 	}
 
 	id := args[0]
@@ -118,7 +117,7 @@ func (s Storage) isVerified(stub shim.ChaincodeStubInterface, args []string) pb.
 
 func (s Storage) verify(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 6 {
-		return shim.Error(codes.NotEnoughArguments)
+		return shim.Error(codes.WrongAmountOfArguments)
 	}
 
 	from := args[0]
@@ -128,17 +127,12 @@ func (s Storage) verify(stub shim.ChaincodeStubInterface, args []string) pb.Resp
 	status := args[4]
 	timestamp := args[5]
 
-	publicKey, err := keys.PublicKey(stub, from)
+	err := identify(stub, from, signature, status)
 	if err != nil {
-		return shim.Error(codes.GetState)
+		return shim.Error(err.Error())
 	}
 
 	ns := formatVerificationNamespace(to, property)
-
-	err = checkSignature(publicKey, []byte(ns), signature)
-	if err != nil {
-		return shim.Error(codes.Unauthorized)
-	}
 
 	b, err := stub.GetState(ns)
 	if err != nil {

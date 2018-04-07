@@ -10,7 +10,7 @@ import (
 
 func (s Storage) timeOfLastUpdate(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 2 {
-		return shim.Error(codes.NotEnoughArguments)
+		return shim.Error(codes.WrongAmountOfArguments)
 	}
 
 	id := args[0]

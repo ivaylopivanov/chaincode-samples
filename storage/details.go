@@ -16,7 +16,7 @@ type details struct {
 
 func (s Storage) getDetailsForProperty(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 3 {
-		return shim.Error(codes.NotEnoughArguments)
+		return shim.Error(codes.WrongAmountOfArguments)
 	}
 
 	from := args[0]

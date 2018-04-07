@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/ivaylopivanov/chaincode-samples/storage/codes"
-	"github.com/ivaylopivanov/chaincode-samples/storage/keys"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -12,26 +11,26 @@ import (
 
 func (s Storage) batchExchange(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 3 {
-		return shim.Error(codes.NotEnoughArguments)
+		return shim.Error(codes.WrongAmountOfArguments)
 	}
 
 	from := args[0]
 	to := args[1]
-	f := args[2]
+	signature := args[2]
+	f := args[3]
 	fields := []field{}
 
-	err := json.Unmarshal([]byte(f), &fields)
-	if err != nil {
-		return shim.Error(codes.BadRequest)
-	}
-
-	publicKey, err := keys.PublicKey(stub, from)
+	err := identify(stub, from, signature, f)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
 
+	err = json.Unmarshal([]byte(f), &fields)
+	if err != nil {
+		return shim.Error(codes.BadRequest)
+	}
+
 	for _, f := range fields {
-		err = checkSignature(publicKey, []byte(formatNamespace(to, f.Property)), f.Signature)
 		err = resetVerificationFor(stub, from, to, f.Property)
 		if err != nil {
 			return shim.Error(err.Error())

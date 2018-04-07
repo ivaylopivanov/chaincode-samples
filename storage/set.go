@@ -11,27 +11,26 @@ const statusOK = int32(200)
 
 func (s Storage) set(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 4 {
-		return shim.Error(codes.NotEnoughArguments)
+		return shim.Error(codes.WrongAmountOfArguments)
 	}
 
 	id := args[0]
-	property := args[1]
-	hash := args[2]
-	signature := args[3]
-
-	err := checkIdentity(stub, id, property, signature)
+	signature := args[1]
+	property := args[2]
+	hash := args[3]
+	err := identify(stub, id, signature, hash)
 	if err != nil {
-		return shim.Error(codes.Unauthorized)
-	}
-
-	err = stub.PutState(formatNamespace(id, property), []byte(hash))
-	if err != nil {
-		return shim.Error(codes.PutState)
+		return shim.Error(err.Error())
 	}
 
 	err = resetVerification(stub, id, property)
 	if err != nil {
 		return shim.Error(err.Error())
+	}
+
+	err = stub.PutState(formatNamespace(id, property), []byte(hash))
+	if err != nil {
+		return shim.Error(codes.PutState)
 	}
 
 	return shim.Success(nil)

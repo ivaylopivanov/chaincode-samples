@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -54,7 +55,6 @@ nXbrJYAG5mOjW//wwfRz3hMlnzKDIvZ946dHIPsguF2qRYjmNndQmAoShohnWlrT
 371aa5Wj7/Gv+DamJItScMs9hnZhdk4SffnIvrsAcZu08VNLXLc=
 -----END RSA PRIVATE KEY-----`
 
-const signature = "FAGwbzC323MKl8HUz+NgbOxW2NRMh7Qm+lsq5LHZt9uTYgl6sGwmO1WMD6Zh3Bu0mApwtiksncis1V5d/aJg634wZUCs4dWVj53YI1//9tRvzF/q+T3LV4DcQOFLHr9dygNUMTin/ZYqRihS6mVaF/Wg6fKNkJmom7QNA05ZxqlyjzlHNXiKQ0V6MA3XY/+PwvbGu0cveK+pBg/hHl/Rm+y3gCTT9r5VwVWoSQC88eWba2LhNPo7UR/Glr4DA/INethiS16s2KWf6gmwgvi9S/V3uH93iHQty7rVXHIfZxY6BsU+dIUcM6upGN5pQTaWbqYBKeM9WZ7DF0bBOAbVhg=="
 const id = "1234567"
 
 var (
@@ -105,7 +105,7 @@ func TestSetAndGet(t *testing.T) {
 	stub := shim.NewMockStub("mockStub", new(Storage))
 
 	mockCreate(stub)
-	value := "Some wonderful place"
+	value := "Some wonderful place 1"
 
 	res := mockSet(stub, property, []byte(value))
 	assert.Equal(t, statusOK, res.Status)
@@ -120,9 +120,9 @@ func TestBatchGetWithSingleKey(t *testing.T) {
 	stub := shim.NewMockStub("mockStub", new(Storage))
 
 	mockCreate(stub)
-	value := "Some wonderful place"
+	value := "Some wonderful place 2"
 
-	expected := `{"/profile/get":"Some wonderful place"}`
+	expected := `{"/profile/get":"Some wonderful place 2"}`
 
 	res := mockSet(stub, property, []byte(value))
 	assert.Equal(t, statusOK, res.Status)
@@ -146,20 +146,20 @@ func TestBatchSet(t *testing.T) {
 
 	f := []field{
 		field{
-			Property:  string(property),
-			Signature: signature,
-			Hash:      hash,
+			Property: string(property),
+			Hash:     hash,
 		},
 		field{
-			Property:  string(property),
-			Signature: signature,
-			Hash:      hash,
+			Property: string(property),
+			Hash:     hash,
 		},
 	}
 
 	b, _ := json.Marshal(f)
 
-	res := stub.MockInvoke(getID(), [][]byte{[]byte("batchSet"), []byte(id), b})
+	s := sign(b)
+
+	res := stub.MockInvoke(getID(), [][]byte{[]byte("batchSet"), []byte(id), s, b})
 	assert.Equal(t, statusOK, res.Status)
 
 	res = stub.MockInvoke(getID(), [][]byte{[]byte("batchGet"), []byte(id), property})
@@ -174,29 +174,14 @@ func TestIdentify(t *testing.T) {
 
 	mockCreate(stub)
 
-	testIdentify := func(trx string, expected bool) int64 {
-		b, err := signatures.Sign([]byte(privateKey), []byte(trx))
-		assert.Equal(t, nil, err)
+	sha := sha256.New()
+	sha.Write([]byte("some random hash"))
+	hash := hex.EncodeToString(sha.Sum(nil))
 
-		res := stub.MockInvoke(getID(), [][]byte{[]byte("identify"), []byte(id), b})
-		payload := identifyRes{}
+	s := sign([]byte(hash))
 
-		json.Unmarshal(res.Payload, &payload)
-		assert.Equal(t, expected, payload.Success)
-
-		return payload.Current
-	}
-
-	testIdentify("1", true)
-	testIdentify("2", true)
-	testIdentify("0", false)
-	testIdentify("3", true)
-	testIdentify("4", true)
-	testIdentify("4213213", false)
-	testIdentify("0", false)
-	current := testIdentify("5", true)
-
-	assert.Equal(t, int64(5), current)
+	res := stub.MockInvoke(getID(), [][]byte{[]byte("identify"), []byte(id), s, []byte(hash)})
+	assert.Equal(t, statusOK, res.Status)
 }
 
 func getID() string {
@@ -209,9 +194,20 @@ func mockCreate(stub *shim.MockStub) pb.Response {
 }
 
 func mockSet(stub *shim.MockStub, k, v []byte) pb.Response {
-	return stub.MockInvoke(getID(), [][]byte{[]byte("set"), []byte(id), k, v, []byte(signature)})
+	s := sign(v)
+	return stub.MockInvoke(getID(), [][]byte{[]byte("set"), []byte(id), s, k, v})
 }
 
 func getMockKeys(stub *shim.MockStub) pb.Response {
 	return stub.MockInvoke(getID(), [][]byte{[]byte("getKeys"), []byte(id)})
+}
+
+func sign(v []byte) []byte {
+	t := time.Now().Format("20060102150405")
+	sha := sha256.New()
+	sha.Write(v)
+	value := string(hex.EncodeToString(sha.Sum(nil))) + "-" + t
+	signed, _ := signatures.Sign([]byte(privateKey), []byte(value))
+	s := string(signed) + "-tp-" + t
+	return []byte(s)
 }

@@ -12,7 +12,7 @@ import (
 
 func (s Storage) create(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) < 3 {
-		return shim.Error(codes.NotEnoughArguments)
+		return shim.Error(codes.WrongAmountOfArguments)
 	}
 
 	id := args[0]
